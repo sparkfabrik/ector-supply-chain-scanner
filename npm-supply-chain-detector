@@ -285,13 +285,8 @@ while [[ $# -gt 0 ]]; do
             shift
             ;;
         *)
-            # Assume it's the directory to scan
-            # Validate and canonicalize the path to prevent directory traversal attacks
-            if [[ -d "$1" ]]; then
-                SCAN_DIR="$(cd "$1" && pwd)"
-            else
-                SCAN_DIR="$1"
-            fi
+            # Assume it's the directory to scan (validation happens after parsing)
+            SCAN_DIR="$1"
             shift
             ;;
     esac
@@ -311,7 +306,7 @@ if [[ -n "${SCAN_DIR}" ]]; then
         echo "Error: Directory not found: ${SCAN_DIR}"
         exit 1
     fi
-    # Canonicalize the path
+    # Canonicalize the path (convert to absolute path)
     SCAN_DIR="$(cd "${SCAN_DIR}" && pwd)"
 fi
 
