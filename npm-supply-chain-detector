@@ -6,6 +6,7 @@
 # Supported attacks:
 # - september-2025-qix: qix- account hijacking (Sept 2025, ~70 packages)
 # - shai-hulud-2: Shai-Hulud 2.0 campaign (Nov 2025, ~700 packages)
+# - vercel-react-nextjs-2025: CVE-2025-55184 & CVE-2025-55183 (Dec 2025, ~190 packages)
 # - all: Check for all known attacks (default)
 
 set -euo pipefail
@@ -192,10 +193,14 @@ load_compromised_packages() {
         "shai-hulud-2")
             load_attack_file "${ATTACKS_DIR}/shai-hulud-2.txt" "Shai-Hulud 2.0 Attack"
             ;;
+        "vercel-react-nextjs-2025")
+            load_attack_file "${ATTACKS_DIR}/vercel-react-nextjs-2025.txt" "CVE-2025-55184 and CVE-2025-55183"
+            ;;
         "all")
             log "INFO" "Loading all known attacks..."
             load_attack_file "${ATTACKS_DIR}/september-2025-qix.txt" "September 2025 qix- Attack"
             load_attack_file "${ATTACKS_DIR}/shai-hulud-2.txt" "Shai-Hulud 2.0 Attack"
+            load_attack_file "${ATTACKS_DIR}/vercel-react-nextjs-2025.txt" "CVE-2025-55184 and CVE-2025-55183"
             ;;
         *)
             log "ERROR" "Unknown attack: ${SELECTED_ATTACK}"
@@ -226,6 +231,7 @@ show_help() {
     echo "Available Attacks:"
     echo "  september-2025-qix     September 2025 qix- account hijacking (~70 packages)"
     echo "  shai-hulud-2           Shai-Hulud 2.0 supply chain attack (~700 packages)"
+    echo "  vercel-react-nextjs-2025  CVE-2025-55184 & CVE-2025-55183 Next.js/React vulnerabilities (~190 packages)"
     echo "  all                    Check for all known attacks (default)"
     echo ""
     echo "Examples:"
@@ -233,6 +239,7 @@ show_help() {
     echo "  $0 /path/to/project                   # Scan specific dir for all attacks"
     echo "  $0 -a shai-hulud-2                    # Check only Shai-Hulud 2.0"
     echo "  $0 -a september-2025-qix .            # Check only Sept 2025 attack"
+    echo "  $0 -a vercel-react-nextjs-2025        # Check only CVE-2025-55184/55183"
     echo "  $0 --list-attacks                     # List all available attacks"
     echo ""
 }
@@ -258,6 +265,12 @@ for arg in "$@"; do
             echo "    Date: November 21-23, 2025"
             echo "    Packages: ~700"
             echo "    Description: Mass attack affecting posthog-node, @postman/*, @ensdomains/*, @zapier/*"
+            echo ""
+            echo -e "  ${GREEN}vercel-react-nextjs-2025${NC}"
+            echo "    Name: CVE-2025-55184 and CVE-2025-55183 - Next.js/React Vulnerabilities"
+            echo "    Date: December 11, 2025"
+            echo "    Packages: ~190"
+            echo "    Description: Source code exposure and DoS vulnerabilities in Next.js 13.3+ and React 19.0.0-19.2.2"
             echo ""
             echo -e "  ${GREEN}all${NC}"
             echo "    Check for all known attacks (default)"

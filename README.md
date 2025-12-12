@@ -45,6 +45,17 @@ The detector can be executed directly (`./npm-supply-chain-detector`).
 
 ## Supported Attacks
 
+### CVE-2025-55184 and CVE-2025-55183 - Next.js/React Vulnerabilities (December 2025)
+- **Date**: December 11, 2025
+- **Packages**: ~190 vulnerable package versions
+- **Targets**: Next.js 13.3+, React 19.0.0-19.2.2, and related server component packages
+- **CVEs**: 
+  - CVE-2025-55183: Source code exposure (Medium severity)
+  - CVE-2025-55184: Denial of Service via infinite loop (High severity)
+- **Affected**: Next.js applications using App Router with React Server Components
+- **Reference**: [Next.js Security Update](https://nextjs.org/blog/security-update-2025-12-11)
+- **Fix**: Upgrade to patched versions (Next.js 14.2.35+, 15.0.7+, 15.1.11+, etc. and React 19.0.3+, 19.1.4+, or 19.2.3+)
+
 ### Shai-Hulud 2.0 (November 2025)
 - **Date**: November 21-23, 2025
 - **Packages**: ~700 compromised packages
@@ -79,6 +90,9 @@ npm-supply-chain-detector -a shai-hulud-2
 
 # Check for September 2025 qix attack only
 npm-supply-chain-detector -a september-2025-qix
+
+# Check for CVE-2025-55184 and CVE-2025-55183 only
+npm-supply-chain-detector -a vercel-react-nextjs-2025
 ```
 
 ### Information Commands
@@ -155,7 +169,8 @@ supply-chain-security-detectors/
 ├── attacks/
 │   ├── attacks.json             # Attack metadata
 │   ├── shai-hulud-2.txt         # Shai-Hulud 2.0 package list
-│   └── september-2025-qix.txt   # September 2025 qix package list
+│   ├── september-2025-qix.txt   # September 2025 qix package list
+│   └── vercel-react-nextjs-2025.txt  # CVE-2025-55184/55183 vulnerable versions
 └── README.md                    # This file
 ```
 
@@ -189,6 +204,7 @@ supply-chain-security-detectors/
 
 ## References
 
+- [CVE-2025-55184 and CVE-2025-55183 Security Update](https://nextjs.org/blog/security-update-2025-12-11)
 - [Shai-Hulud 2.0 Analysis](https://www.wiz.io/blog/shai-hulud-2-0-ongoing-supply-chain-attack)
 - [NPM Security Best Practices](https://docs.npmjs.com/packages-and-modules/securing-your-code)
 - [GitHub Actions Security](https://docs.github.com/en/actions/security-guides)
