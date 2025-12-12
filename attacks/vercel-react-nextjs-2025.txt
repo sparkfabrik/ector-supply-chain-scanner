@@ -3,7 +3,8 @@
 # Source: https://nextjs.org/blog/security-update-2025-12-11
 # CVE-2025-55183: Source Code Exposure (Medium Severity)
 # CVE-2025-55184: Denial of Service (High Severity)
-# Affects: Next.js 13.3+ with App Router and React 19.0.0-19.2.2
+# Affects: Next.js 13.3+ (when App Router is used) and React 19.0.0-19.2.2
+# Note: Only Next.js with App Router is affected. Pages Router is not vulnerable.
 # Format: ["package-name"]="vulnerable-version"
 
 # Next.js vulnerable versions (listing specific patch versions)
