@@ -1,6 +1,6 @@
 # NPM Supply-Chain Detector
 
-This directory hosts a Bash-based scanner that flags compromised npm packages and payload breadcrumbs associated with documented attacks (September 2025 qix incident, Shai-Hulud 2.0, etc.). Indicators are stored under `attacks/` so that new campaigns can be onboarded without rewriting the script.
+This directory hosts a Bash-based scanner that flags compromised npm packages and payload breadcrumbs associated with documented supply chain attacks (September 2025 qix incident, Shai-Hulud 2.0) as well as known CVE vulnerabilities (CVE-2025-55184 and CVE-2025-55183 affecting Next.js and React). Indicators are stored under `attacks/` so that new campaigns and vulnerabilities can be onboarded without rewriting the script.
 
 ## Quick Start
 
@@ -13,6 +13,9 @@ This directory hosts a Bash-based scanner that flags compromised npm packages an
 
 # Check for specific attack only
 ./npm-supply-chain-detector -a shai-hulud-2
+
+# Check for CVE-2025-55184 and CVE-2025-55183 (Next.js/React vulnerabilities)
+./npm-supply-chain-detector -a vercel-react-nextjs-2025
 
 # List all available attacks
 ./npm-supply-chain-detector --list-attacks
@@ -130,6 +133,46 @@ npm-supply-chain-detector --list-attacks
 - `1` - Compromised packages or malicious code detected
 - `2` - No package manifests found to scan
 
+## Example Output
+
+### Detecting CVE-2025-55184 and CVE-2025-55183
+
+```bash
+$ ./npm-supply-chain-detector -a vercel-react-nextjs-2025
+
+🔍 NPM Compromise Checker - 
+📂 Scanning directory: /path/to/project
+🎯 Attack filter: vercel-react-nextjs-2025
+─────────────────────────────────────────────────────────────
+[INFO] Loading packages from CVE-2025-55184 and CVE-2025-55183...
+[SUCCESS] Loaded 190 compromised packages from CVE-2025-55184 and CVE-2025-55183
+[INFO] Checking ./package.json...
+[ERROR] COMPROMISED VERSION FOUND: next@15.0.5 in ./package.json
+  ↳ Compromised versions tracked: 15.0.0||15.0.1||15.0.2||...
+[ERROR] COMPROMISED VERSION FOUND: react@19.0.1 in ./package.json
+  ↳ Compromised versions tracked: 19.0.0||19.0.1||19.0.2||...
+─────────────────────────────────────────────────────────────
+✅ Scan completed in 0s
+📊 Packages checked: 3
+⚠️  Issues found: 2
+
+🚨 CRITICAL SECURITY ALERT: 2 issues found!
+```
+
+### Clean Scan Result
+
+```bash
+$ ./npm-supply-chain-detector
+
+✅ Scan completed in 2s
+📊 Packages checked: 145
+📄 Files scanned: 23
+⚠️  Issues found: 0
+
+✅ No compromised packages or malicious code detected!
+Your project appears to be safe from known supply chain attacks.
+```
+
 ## Adding New Attacks
 
 To add a new attack signature:
@@ -196,11 +239,49 @@ supply-chain-security-detectors/
 
 ## What to Do If Issues Are Found
 
+### For Supply Chain Attacks (Shai-Hulud 2.0, September 2025 qix)
+
 1. **Isolate**: Disconnect affected systems from the network
 2. **Rotate credentials**: GitHub, cloud providers, npm, API keys
 3. **Clean**: Remove node_modules, clear npm cache, reinstall dependencies
 4. **Audit**: Review GitHub Actions, commits, and published packages
 5. **Report**: Contact security team and relevant package maintainers
+
+### For CVE-2025-55184 and CVE-2025-55183 (Next.js/React Vulnerabilities)
+
+If the scanner detects vulnerable versions of Next.js or React:
+
+1. **Upgrade Immediately**: Update to the patched versions
+   ```bash
+   # For Next.js 14.x
+   npm install next@14.2.35 react@19.0.3 react-dom@19.0.3
+   
+   # For Next.js 15.0.x
+   npm install next@15.0.7 react@19.0.3 react-dom@19.0.3
+   
+   # For Next.js 15.1.x
+   npm install next@15.1.11 react@19.1.4 react-dom@19.1.4
+   
+   # Or update to latest
+   npm install next@latest react@latest react-dom@latest
+   ```
+
+2. **Verify the Fix**: Run the scanner again to confirm
+   ```bash
+   ./npm-supply-chain-detector -a vercel-react-nextjs-2025
+   ```
+
+3. **Test Your Application**: Ensure all functionality still works after the upgrade
+
+4. **Review Logs**: Check for any suspicious activity that may have occurred before patching
+   - Review server logs for unusual requests
+   - Check for any source code that may have been exposed
+
+5. **Update CI/CD**: Ensure your continuous integration pipelines use the patched versions
+
+6. **Monitor**: Watch for any unusual behavior after the update
+
+**Note**: These CVEs do not involve malicious code injection, so credential rotation is not necessary unless you suspect unauthorized access occurred due to source code exposure.
 
 ## References
 
