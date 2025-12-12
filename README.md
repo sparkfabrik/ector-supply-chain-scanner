@@ -23,18 +23,16 @@ This directory hosts a Bash-based scanner that flags compromised npm packages an
 
 > Tip: Symlink `sparkSec/sparkSec.sh` somewhere in your `PATH` (e.g., `/usr/local/bin/sparkSec`) to invoke the same commands from anywhere.
 
-## Installation & Sparkdock Integration
+## Installation
 
 1. Clone this repository:
    ```bash
    git clone https://github.com/sparkfabrik/supply-chain-security-detectors.git
    ```
-2. (Optional) Place it at `/opt/supply-chain-security-detectors` so that Sparkdock’s `sjust` commands can discover it automatically.
-3. (Optional) Symlink `sparkSec/sparkSec.sh` into your `PATH` so you can run `sparkSec security-*` directly from this repo.
-4. Alternatively, export `SUPPLY_CHAIN_SECURITY_DETECTORS_PATH=/path/to/your/clone` before running Sparkdock’s `sjust security-*` commands.
-5. Keep the repository up to date to receive new attack signatures.
+2. (Optional) Symlink `sparkSec/sparkSec.sh` into your `PATH` so you can run `sparkSec security-*` directly from this repo.
+3. Keep the repository up to date to receive new attack signatures.
 
-The detector can be executed directly (`./npm-supply-chain-detector`) or via Sparkdock (`sjust security-scan-npm`), which shells out to the same script.
+The detector can be executed directly (`./npm-supply-chain-detector`).
 
 ## Features
 
@@ -189,18 +187,6 @@ supply-chain-security-detectors/
 4. **Audit**: Review GitHub Actions, commits, and published packages
 5. **Report**: Contact security team and relevant package maintainers
 
-## Integration with Sparkdock
-
-This tool is integrated with Sparkdock's task runner (sjust). Place the repository at `/opt/supply-chain-security-detectors` or export `SUPPLY_CHAIN_SECURITY_DETECTORS_PATH` so the recipes can find it, then use:
-
-```bash
-# Run supply chain scan
-sjust security-scan-npm
-
-# Scan specific attack
-sjust security-scan-npm-attack shai-hulud-2
-```
-
 ## References
 
 - [Shai-Hulud 2.0 Analysis](https://www.wiz.io/blog/shai-hulud-2-0-ongoing-supply-chain-attack)
@@ -209,4 +195,4 @@ sjust security-scan-npm-attack shai-hulud-2
 
 ## License
 
-Released under the GNU General Public License v3.0 (same as Sparkdock).
+Released under the GNU General Public License v3.0.
