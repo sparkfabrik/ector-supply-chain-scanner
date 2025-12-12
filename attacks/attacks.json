@@ -50,5 +50,16 @@
     "workflowPaths": [
       ".github/workflows/discussion.yaml"
     ]
+  },
+  {
+    "id": "vercel-react-nextjs-2025",
+    "name": "CVE-2025-55184 and CVE-2025-55183 - Next.js/React Vulnerabilities",
+    "file": "vercel-react-nextjs-2025.txt",
+    "date": "2025-12-11",
+    "packages": 190,
+    "description": "CVE-2025-55183 (Source Code Exposure) and CVE-2025-55184 (Denial of Service) affecting Next.js 13.3+ and React 19.0.0-19.2.2",
+    "signatures": [],
+    "payloadFiles": [],
+    "workflowPaths": []
   }
 ]
