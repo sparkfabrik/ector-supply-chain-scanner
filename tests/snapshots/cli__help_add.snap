@@ -2,12 +2,12 @@
 source: tests/cli.rs
 expression: normalized
 ---
-Add a new attack to the database
+Add a new threat to the database
 
 Usage: ector add [OPTIONS]
 
 Options:
-      --name <NAME>                Attack name
+      --name <NAME>                Threat name
       --date <DATE>                Discovery date (YYYY-MM-DD)
       --description <DESCRIPTION>  Description
       --cve <CVE>                  CVE number (optional)

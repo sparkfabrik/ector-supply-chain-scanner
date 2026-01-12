@@ -657,7 +657,7 @@ fn test_main_help() {
 }
 
 // ============================================================================
-// CHECK COMMAND TESTS - SETUP + CHECK + SNAPSHOT PATTERN
+// CHECK COMMAND TESTS
 // ============================================================================
 
 /// Setup phase: Add a threat and verify it was added successfully via list command

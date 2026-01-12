@@ -18,9 +18,9 @@ pub struct Cli {
 
 #[derive(Subcommand)]
 pub enum Commands {
-    /// Add a new attack to the database
+    /// Add a new threat to the database
     Add {
-        /// Attack name
+        /// Threat name
         #[arg(long)]
         name: Option<String>,
 
@@ -59,24 +59,24 @@ pub enum Commands {
 
     /// Check for compromised packages
     Check {
-        /// Check all known attacks
-        #[arg(long, conflicts_with = "attack")]
+        /// Check all known threats
+        #[arg(long, conflicts_with = "threat")]
         all: bool,
 
-        /// Check specific attack by name
-        #[arg(short = 'a', long, conflicts_with = "all")]
-        attack: Option<String>,
+        /// Check specific threat by name
+        #[arg(short = 't', long, conflicts_with = "all")]
+        threat: Option<String>,
 
         /// Directory to scan
         #[arg(short, long, default_value = ".")]
         directory: PathBuf,
 
-        /// Interactive mode: select attack from list
+        /// Interactive mode: select threat from list
         #[arg(short, long)]
         interactive: bool,
     },
 
-    /// List all known attacks
+    /// List all known threats
     List,
 }
 
@@ -112,10 +112,10 @@ impl Cli {
 
             Commands::Check {
                 all,
-                attack,
+                threat,
                 directory,
                 interactive,
-            } => commands::check::handle(store, all, attack, &directory, interactive),
+            } => commands::check::handle(store, all, threat, &directory, interactive),
         }
     }
 }

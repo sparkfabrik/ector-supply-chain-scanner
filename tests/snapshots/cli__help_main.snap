@@ -7,9 +7,9 @@ NPM Supply Chain Security Scanner
 Usage: ector <COMMAND>
 
 Commands:
-  add    Add a new attack to the database
+  add    Add a new threat to the database
   check  Check for compromised packages
-  list   List all known attacks
+  list   List all known threats
   help   Print this message or the help of the given subcommand(s)
 
 Options:
