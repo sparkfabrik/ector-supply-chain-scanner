@@ -21,11 +21,14 @@ Get up and running in under a minute:
 
 ```bash
 # Install from GitHub
-cargo install --git <REPO_URL>
+curl -sSL https://raw.githubusercontent.com/sparkfabrik/supply-chain-security-detectors/main/script/install.sh | sh
 
 # Scan your project for known threats
 cd /path/to/your/js/ts-project
 ector check --all
+
+# If you want to uninstall it
+curl -sSL https://raw.githubusercontent.com/sparkfabrik/supply-chain-security-detectors/main/script/uninstall.sh | sh
 ```
 
 That's it! Ector will scan your project against all known supply chain threats and report any matches.
