@@ -1,198 +1,345 @@
-# NPM Supply-Chain Detector
+# Ector
 
-This directory hosts a Bash-based scanner that flags compromised npm packages and payload breadcrumbs associated with documented attacks (September 2025 qix incident, Shai-Hulud 2.0, etc.). Indicators are stored under `attacks/` so that new campaigns can be onboarded without rewriting the script.
+A command-line tool for detecting and managing known supply chain threats in JavaScript/TypeScript projects.
+
+> **Disclaimer**: This is a highly experimental project provided without any warranty. We are using it as a playground to explore and automate the scanning of npm dependencies for known supply chain threats. Use at your own risk and do not rely on it as your sole security measure.
+
+## Table of Contents
+
+- [Quick Start](#quick-start)
+- [Installation](#installation)
+- [Usage](#usage)
+- [Developer Guide](#developer-guide)
+- [Project Structure](#project-structure)
+- [License](#license)
+
+---
 
 ## Quick Start
 
+Get up and running in under a minute:
+
 ```bash
-# Scan current directory for all known attacks
-./npm-supply-chain-detector
+# Install from GitHub
+curl -sSL https://raw.githubusercontent.com/sparkfabrik/supply-chain-security-detectors/main/script/install.sh | sh
 
-# Scan a specific project
-./npm-supply-chain-detector /path/to/project
+# Scan your project for known threats
+cd /path/to/your/js/ts-project
+ector check --all
 
-# Check for specific attack only
-./npm-supply-chain-detector -a shai-hulud-2
-
-# List all available attacks
-./npm-supply-chain-detector --list-attacks
-
-# Run the bundled sparkSec recipe runner (lists commands if no args are passed)
-./sparkSec/sparkSec.sh security-scan-npm
+# If you want to uninstall it
+curl -sSL https://raw.githubusercontent.com/sparkfabrik/supply-chain-security-detectors/main/script/uninstall.sh | sh
 ```
 
-> Tip: Symlink `sparkSec/sparkSec.sh` somewhere in your `PATH` (e.g., `/usr/local/bin/sparkSec`) to invoke the same commands from anywhere.
+That's it! Ector will scan your project against all known supply chain threats and report any matches.
+
+### Alternative: Build from Source
+
+```bash
+git clone <REPO>
+cd ector
+cargo build --release
+./target/release/ector check --all
+```
+
+### Quick Examples
+
+```bash
+# List all known threats in the database
+ector list
+
+# Check a specific project directory
+ector check --all --directory ~/projects/my-app
+
+# Add a new threat to track
+ector add --interactive
+```
+
+---
 
 ## Installation
 
-1. Clone this repository:
-   ```bash
-   git clone https://github.com/sparkfabrik/supply-chain-security-detectors.git
-   ```
-2. (Optional) Symlink `sparkSec/sparkSec.sh` into your `PATH` so you can run `sparkSec security-*` directly from this repo.
-3. Keep the repository up to date to receive new attack signatures.
+### Using Cargo (Recommended)
 
-The detector can be executed directly (`./npm-supply-chain-detector`).
+Install directly from GitHub:
 
-## Features
+```bash
+cargo install --git <REPO_URL>
+```
 
-- **Multi-Attack Detection**: Checks for multiple supply chain attacks simultaneously
-- **Package Version Scanning**: Detects compromised package versions in package.json, package-lock.json, and yarn.lock
-- **Malicious Code Detection**: Scans JavaScript files for known attack signatures
-- **Payload Artifact Detection**: Identifies malicious files dropped by attacks
-- **Workflow Backdoor Detection**: Checks for malicious GitHub Actions workflows
-- **Node.js Optimization**: Uses a Node.js helper for faster dependency parsing when available
+This clones, compiles, and installs the latest version to `~/.cargo/bin/`.
 
-## Supported Attacks
+To install a specific branch or tag:
 
-### Shai-Hulud 2.0 (November 2025)
-- **Date**: November 21-23, 2025
-- **Packages**: ~700 compromised packages
-- **Targets**: posthog-node, @postman/*, @ensdomains/*, @zapier/* and many others
-- **Reference**: [Wiz.io Blog](https://www.wiz.io/blog/shai-hulud-2-0-ongoing-supply-chain-attack)
+```bash
+# Install from a specific branch
+cargo install --git <REPO_URL> --branch <BRANCH_NAME>
 
-### September 2025 qix- Account Hijacking
-- **Date**: September 8-15, 2025
-- **Packages**: ~70 compromised packages
-- **Targets**: chalk, ansi-styles, color, debug and related packages
+# Install a specific tag/version
+cargo install --git <REPO_URL> --tag <TAG_VERSION>
+```
+
+### From Source
+
+For development or to make local modifications:
+
+#### Prerequisites
+
+- Rust toolchain (1.70+)
+- Cargo
+
+#### Build Steps
+
+```bash
+# Clone the repository
+git clone <REPO>
+cd ector
+
+# Build in release mode
+cargo build --release
+
+# The binary will be at target/release/ector
+```
+
+#### Install System-Wide
+
+```bash
+# Option 1: Using cargo install
+cargo install --path .
+
+# Option 2: Manual installation
+sudo cp target/release/ector /usr/local/bin/
+
+# Option 3: User-local installation
+cp target/release/ector ~/.local/bin/
+# Make sure ~/.local/bin is in your PATH
+```
+
+#### Verify Installation
+
+```bash
+ector help
+```
+
+---
 
 ## Usage
 
-### Basic Scanning
+### Basic Workflow
 
-```bash
-# Scan current directory
-npm-supply-chain-detector
-
-# Scan specific directory
-npm-supply-chain-detector /path/to/project
-```
-
-### Attack Selection
-
-```bash
-# Check for all attacks (default)
-npm-supply-chain-detector -a all
-
-# Check for Shai-Hulud 2.0 only
-npm-supply-chain-detector -a shai-hulud-2
-
-# Check for September 2025 qix attack only
-npm-supply-chain-detector -a september-2025-qix
-```
-
-### Information Commands
-
-```bash
-# Show help
-npm-supply-chain-detector --help
-
-# List all available attacks
-npm-supply-chain-detector --list-attacks
-```
-
-## What Gets Scanned
-
-1. **Package Manifests**:
-   - `package.json` - all dependency types (dependencies, devDependencies, etc.)
-   - `package-lock.json` - locked versions
-   - `yarn.lock` - Yarn lockfile
-
-2. **Installed Packages**:
-   - `node_modules/` - checks installed package versions
-   - Scopes packages (e.g., `@postman/*`, `@ensdomains/*`)
-
-3. **Source Code**:
-   - `.js`, `.jsx`, `.ts`, `.tsx`, `.mjs`, `.cjs` files
-   - Checks for malicious signatures and heavily obfuscated code
-
-4. **Artifacts**:
-   - Payload files (e.g., `setup_bun.js`, `cloud.json`)
-   - Backdoor workflows (e.g., `.github/workflows/discussion.yaml`)
-
-## Exit Codes
-
-- `0` - No issues found, scan successful
-- `1` - Compromised packages or malicious code detected
-- `2` - No package manifests found to scan
-
-## Adding New Attacks
-
-To add a new attack signature:
-
-1. **Update `attacks/attacks.json`**:
-   ```json
-   {
-     "id": "new-attack-2025",
-     "name": "New Attack 2025",
-     "file": "new-attack-2025.txt",
-     "date": "2025-12-01",
-     "packages": 100,
-     "description": "Description of the attack",
-     "signatures": ["malicious-signature-1", "malicious-signature-2"],
-     "payloadFiles": ["malicious-file.js"],
-     "workflowPaths": [".github/workflows/malicious.yaml"]
-   }
-   ```
-
-2. **Create `attacks/new-attack-2025.txt`**:
+1. **Check your project** for known supply chain threats:
    ```bash
-   # New Attack 2025 - Compromised Packages
-   # Format: ["package-name"]="version"
-   ["compromised-package"]="1.2.3"
-   ["another-package"]="4.5.6"
+   cd your-project
+   ector check --all
    ```
 
-3. **Update the script's case statement** (if needed) in the `load_compromised_packages()` function to handle the new attack ID.
+2. **Review the threats database** to see what Ector detects:
+   ```bash
+   ector list 
+   ```
 
-## Architecture
+3. **Add custom threats** specific to your needs:
+   ```bash
+   ector add --interactive
+   ```
+
+### Command Reference
+
+| Command | Purpose |
+|---------|---------|
+| `add` | Register a new supply chain threat |
+| `list` | Display all registered threats |
+| `check` | Scan a project for known threats |
+| `help` | Show help information |
+
+### Detailed Command Usage
+
+#### `ector check` — Scan for Threats
+
+```bash
+# Check current directory against all threats
+ector check --all
+
+# Check specific directory
+ector check --all --directory /path/to/project
+
+# Check for a specific threat only
+ector check --threat "event-stream-compromise"
+```
+
+**Options:**
+- `--all` — Check all registered threats
+- `--name <NAME>` — Check specific threat by name
+- `--directory <DIR>` — Project directory to scan (default: current directory)
+
+#### `ector list` — View Registered Threats
+
+```bash
+# List all threats (summary view)
+ector list
+
+#### `ector add` — Register a New Threat
+
+```bash
+# Interactive mode (recommended for new users)
+ector add --interactive
+
+# Full command-line specification
+ector add \
+  --name "Event Stream Compromise" \
+  --date "2018-11-26" \
+  --description "Malicious code injection in event-stream" \
+  --cve "CVE-2018-3728" \
+  -p "event-stream@3.3.6" \
+  -p "flatmap-stream@0.1.1" \
+  -s "eval(Buffer.from(" \
+  -f "flatmap-stream/index.js"
+```
+
+**Options:**
+- `--name <NAME>` — Threat name (required)
+- `--date <DATE>` — Discovery date in YYYY-MM-DD format (required)
+- `--description <DESC>` — Threat description (required)
+- `--cve <CVE>` — CVE identifier (optional)
+- `-p, --package <PKG>` — Affected package (repeatable)
+- `-s, --signature <SIG>` — Code signature to detect (repeatable)
+- `-f, --payload <FILE>` — Payload filename (repeatable)
+- `-w, --workflow <PATH>` — Workflow path (repeatable)
+- `--interactive` — Interactive mode
+
+---
+
+## Developer Guide
+
+This section covers how to extend Ector with new functionality.
+
+### Setting Up the Development Environment
+
+```bash
+# Clone the repository
+git clone <REPO>
+cd ector
+
+# Install development dependencies
+cargo install cargo-insta   # Snapshot testing
+cargo install bacon         # Continuous testing (optional)
+
+# Build in debug mode
+cargo build
+
+# Run the test suite
+cargo test
+```
+
+### Architecture Overview
+
+Ector follows a modular architecture with clear separation of concerns:
 
 ```
-supply-chain-security-detectors/
-├── npm-supply-chain-detector    # Main scanner script
-├── scripts/
-│   └── list-deps.js             # Node.js helper for dependency extraction
-├── attacks/
-│   ├── attacks.json             # Attack metadata
-│   ├── shai-hulud-2.txt         # Shai-Hulud 2.0 package list
-│   └── september-2025-qix.txt   # September 2025 qix package list
-└── README.md                    # This file
+┌─────────────────────────────────────────────────────────┐
+│                      CLI Layer                          │
+│                    (src/cli/)                           │
+│  Parses arguments, orchestrates commands, formats output│
+└─────────────────────┬───────────────────────────────────┘
+                      │
+┌─────────────────────▼───────────────────────────────────┐
+│                    Core Layer                           │
+│                   (src/core/)                           │
+│    Threat models, detection logic, matching rules       │
+└─────────────────────┬───────────────────────────────────┘
+                      │
+┌─────────────────────▼───────────────────────────────────┐
+│              Scanner & Store Layers                     │
+│          (src/scanner.rs, src/store/)                   │
+│     File system traversal, threat persistence           │
+└─────────────────────────────────────────────────────────┘
 ```
 
-## Requirements
+### Testing
 
-- **Bash 4.0+**: Required for associative arrays
-- **Node.js** (optional): Enables faster dependency parsing
-- **Standard Unix tools**: grep, sed, find, cut
+#### Running Tests
 
-## Performance
+```bash
+# Run all tests
+cargo test
 
-- **With Node.js**: Uses optimized dependency parser (~2-5 seconds for medium projects)
-- **Without Node.js**: Falls back to grep-based parsing (~5-10 seconds for medium projects)
-- **Scan depth**: Default maximum depth of 5 subdirectories (configurable)
+# Run specific test suite
+cargo test --test cli          # E2E tests
+cargo test --lib               # Unit tests only
 
-## Security Notes
+# Run tests with output
+cargo test -- --nocapture
+```
 
-- This tool checks for **known** compromised versions and signatures
-- A clean scan does **not** guarantee complete security
-- Always run `npm audit` for additional vulnerability checks
-- Keep the attack definitions up to date
-- Review and investigate any warnings about version ranges
+#### Snapshot Testing
 
-## What to Do If Issues Are Found
+Ector uses `cargo-insta` for snapshot testing, which captures expected outputs:
 
-1. **Isolate**: Disconnect affected systems from the network
-2. **Rotate credentials**: GitHub, cloud providers, npm, API keys
-3. **Clean**: Remove node_modules, clear npm cache, reinstall dependencies
-4. **Audit**: Review GitHub Actions, commits, and published packages
-5. **Report**: Contact security team and relevant package maintainers
+```bash
+# Run tests and review new/changed snapshots
+cargo insta test
+cargo insta review
 
-## References
+# Accept all snapshot changes (use with caution)
+cargo insta accept
+```
 
-- [Shai-Hulud 2.0 Analysis](https://www.wiz.io/blog/shai-hulud-2-0-ongoing-supply-chain-attack)
-- [NPM Security Best Practices](https://docs.npmjs.com/packages-and-modules/securing-your-code)
-- [GitHub Actions Security](https://docs.github.com/en/actions/security-guides)
+When you change output formats, update snapshots:
+
+1. Run `cargo insta test`
+2. Review each change with `cargo insta review`
+3. Accept valid changes, reject regressions
+
+#### Continuous Testing
+
+For rapid development feedback:
+
+```bash
+# Watch and run tests on file changes
+bacon test
+
+# Watch specific test suite
+bacon test -- --test cli
+
+# Watch compilation only
+bacon check
+```
+
+### Code Quality
+
+#### Formatting
+
+```bash
+# Check formatting
+cargo fmt --check
+
+# Apply formatting
+cargo fmt
+```
+
+#### Linting
+
+```bash
+# Run clippy
+cargo clippy
+
+# Run with all features enabled
+cargo clippy --all-features
+```
+
+### Contributing Workflow
+
+1. Fork the repository
+2. Create a feature branch: `git checkout -b feature/my-feature`
+3. Make your changes with tests
+4. Run the full test suite: `cargo test`
+5. Check formatting and lints: `cargo fmt --check && cargo clippy`
+6. Submit a pull request
+
+---
 
 ## License
 
-Released under the GNU General Public License v3.0.
+GNU General Public License v3.0
+
+See [LICENSE](LICENSE) for details.
