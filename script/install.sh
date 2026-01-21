@@ -3,7 +3,7 @@ set -e
 
 # Ector installer script
 
-REPO="sparkfabrik/supply-chain-security-detectors"
+REPO="sparkfabrik/ector-supply-chain-scanner"
 INSTALL_DIR="${INSTALL_DIR:-$HOME/.local/bin}"
 
 # Detect platform
